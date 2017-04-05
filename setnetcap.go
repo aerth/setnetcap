@@ -33,6 +33,7 @@ import (
 )
 
 const setcaploc = "/sbin/setcap"
+const loggerloc = "/usr/bin/logger"
 const setcapline = "cap_net_bind_service=+ep"
 
 func init(){
@@ -124,7 +125,7 @@ func selfcheck() error {
 		return nil
 }
 
-
+// could be more checks
 func targetcheck(t string) error {
 		stat, err := os.Stat(t)
 	 	if err != nil {
@@ -136,13 +137,17 @@ func targetcheck(t string) error {
 			case mode&os.ModeSymlink != 0:
 				return fmt.Errorf("Target needs to be file, got symlink")
 			case mode.IsRegular():
-				return nil
+				return nil // good
 			default:
 				return fmt.Errorf("%s", mode.String())
 			}
 }
 
-func tattle(target string){
-	cmd := exec.Command("logger", "setnetcap is setuid and running setcap on "+target)
+var tattle = func(target string){
+	exe , _ := os.Executable()
+	if exe == "" {
+		exe = os.Args[0]
+	}
+	cmd := exec.Command(loggerloc, exe+" is setuid and running "+setcaploc+" on "+target)
 	cmd.Run()
 }
