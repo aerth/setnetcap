@@ -10,7 +10,7 @@ step 1, as any user:
 
 ```
 
-CGO_ENABLED=0 go get -v -ldflags='-s' github.com/aerth/setnetcap
+GOBIN=$PWD CGO_ENABLED=0 go get -v -ldflags='-s' github.com/aerth/setnetcap
 
 ```
 
