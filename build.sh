@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################
 # setnetcap builder, by aerth #
 ###############################
@@ -13,10 +13,10 @@ fi
 
 if [ "$1" == "sudo" ]; then
   if [ -x "setnetcap" ]; then
-  echo running sudo chown root setnetcap && \
+  set -x
   sudo chown root setnetcap && \
-  echo running sudo chmod u+s setnetcap && \
   sudo chmod u+s setnetcap && \
+  set +x
   echo "setnetcap is armed and dangerous"
   exit 0
 fi
@@ -28,14 +28,21 @@ if [ "$1" == "nolog" ]; then
   echo "building with no calls to /usr/bin/logger"
   TAGS=-tags='nolog'
 fi
+set -x
+CGO_ENABLED=0 go build -v -x ${TAGS} -ldflags='-w -s' github.com/aerth/setnetcap && \
+set +x
+set -e
+STR='
+Success:
+congratulations! setnetcap build successful
+*important* now run these commands as root:
+  chown root setnetcap
+  chmod u+s setnetcap
 
-CGO_ENABLED=0 go build ${TAGS} -ldflags='-w -s' github.com/aerth/setnetcap && \
-echo 'congratulations! setnetcap build successful' && \
-echo '*important* now run these commands as root:' && \
-echo '' && \
-echo '  chown root setnetcap' && \
-echo '  chmod u+s setnetcap' && \
-echo '' && \
-echo '*important*: move setnetcap to its final destination before running these commands'
-echo "you can also use './build.sh sudo' to do it for you"
-exit 0
+Tip:
+	you can also use "./build.sh sudo" to do it for you
+
+Usage info:
+  * move target exe to its final destination before using setnetcap
+  * this is because file capabilities may get removed when the file is modified
+'; echo "$STR"; exit 0
